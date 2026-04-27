@@ -52,10 +52,10 @@ const (
 
 var (
 	memoryPoolMutex sync.Mutex
-	memoryPools     = make(map[uint32]sync.Pool)
+	memoryPools     = make(map[uint32]*sync.Pool)
 )
 
-func getMemoryPool(size uint32) sync.Pool {
+func getMemoryPool(size uint32) *sync.Pool {
 	memoryPoolMutex.Lock()
 	defer memoryPoolMutex.Unlock()
 	pool, ok := memoryPools[size]
@@ -63,7 +63,7 @@ func getMemoryPool(size uint32) sync.Pool {
 		return pool
 	}
 
-	pool = sync.Pool{
+	pool = &sync.Pool{
 		New: func() interface{} {
 			return make([]block, size)
 		},
