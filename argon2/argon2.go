@@ -72,11 +72,6 @@ func getMemoryPool(size uint32) sync.Pool {
 	return pool
 }
 
-func getMemory(size uint32) []block {
-	pool := getMemoryPool(size)
-	return pool.Get().([]block)
-}
-
 // Key derives a key from the password, salt, and cost parameters using Argon2i
 // returning a byte slice of length keyLen that can be used as cryptographic
 // key. The CPU cost and parallelism degree must be greater than zero.
@@ -186,7 +181,9 @@ func initHash(password, salt, key, data []byte, time, memory, threads, keyLen ui
 
 func initBlocks(h0 *[blake2b.Size + 8]byte, memory, threads uint32) []block {
 	var block0 [1024]byte
-	B := getMemory(memory)
+	pool := getMemoryPool(memory)
+	B := pool.Get().([]block)
+	defer pool.Put(B)
 	for lane := uint32(0); lane < threads; lane++ {
 		j := lane * (memory / threads)
 		binary.LittleEndian.PutUint32(h0[blake2b.Size+4:], lane)
