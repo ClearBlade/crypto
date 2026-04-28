@@ -136,7 +136,13 @@ func deriveKey(mode int, password, salt, secret, data []byte, time, memory uint3
 	if memory < 2*syncPoints*uint32(threads) {
 		memory = 2 * syncPoints * uint32(threads)
 	}
-	B := initBlocks(&h0, memory, uint32(threads))
+
+	pool := getMemoryPool(memory)
+	B := pool.Get().([]block)
+	defer pool.Put(B)
+	zeroBlocks(B)
+
+	initBlocks(B, &h0, memory, uint32(threads))
 	processBlocks(B, time, memory, uint32(threads), mode)
 	return extractKey(B, memory, uint32(threads), keyLen)
 }
@@ -179,16 +185,16 @@ func initHash(password, salt, key, data []byte, time, memory, threads, keyLen ui
 	return h0
 }
 
-func initBlocks(h0 *[blake2b.Size + 8]byte, memory, threads uint32) []block {
-	var block0 [1024]byte
-	pool := getMemoryPool(memory)
-	B := pool.Get().([]block)
-	defer pool.Put(B)
+func zeroBlocks(B []block) {
 	for i := range B {
 		for j := range B[i] {
 			B[i][j] = 0
 		}
 	}
+}
+
+func initBlocks(B []block, h0 *[blake2b.Size + 8]byte, memory, threads uint32) []block {
+	var block0 [1024]byte
 
 	for lane := uint32(0); lane < threads; lane++ {
 		j := lane * (memory / threads)
