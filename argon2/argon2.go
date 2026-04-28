@@ -184,6 +184,12 @@ func initBlocks(h0 *[blake2b.Size + 8]byte, memory, threads uint32) []block {
 	pool := getMemoryPool(memory)
 	B := pool.Get().([]block)
 	defer pool.Put(B)
+	for i := range B {
+		for j := range B[i] {
+			B[i][j] = 0
+		}
+	}
+
 	for lane := uint32(0); lane < threads; lane++ {
 		j := lane * (memory / threads)
 		binary.LittleEndian.PutUint32(h0[blake2b.Size+4:], lane)
