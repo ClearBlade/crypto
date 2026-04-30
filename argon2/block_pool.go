@@ -18,6 +18,8 @@ func init() {
 		panic(fmt.Errorf("argon2: failed to create block pools cache: %w", err))
 	}
 
+	blockPoolMutex.Lock()
+	defer blockPoolMutex.Unlock()
 	blockPools = poolsCache
 }
 
@@ -37,7 +39,7 @@ func upsertBlockPool(size uint32) *sync.Pool {
 	}
 
 	pool := &sync.Pool{
-		New: func() interface{} {
+		New: func() any {
 			return make([]block, size)
 		},
 	}
