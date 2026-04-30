@@ -38,7 +38,8 @@ func upsertBlockPool(size uint32) *sync.Pool {
 
 	pool := &sync.Pool{
 		New: func() any {
-			return make([]block, size)
+			b := make([]block, size)
+			return &b
 		},
 	}
 
