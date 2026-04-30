@@ -140,7 +140,7 @@ func deriveKey(mode int, password, salt, secret, data []byte, time, memory uint3
 	pool := getBlockPool(memory)
 	B := pool.Get().([]block)
 	defer pool.Put(B)
-	clearBlocks(B)
+	defer clearBlocks(B)
 
 	initBlocks(B, &h0, memory, uint32(threads))
 	processBlocks(B, time, memory, uint32(threads), mode)
@@ -193,7 +193,7 @@ func clearBlocks(B []block) {
 	}
 }
 
-func initBlocks(B []block, h0 *[blake2b.Size + 8]byte, memory, threads uint32) []block {
+func initBlocks(B []block, h0 *[blake2b.Size + 8]byte, memory, threads uint32) {
 	var block0 [1024]byte
 	for lane := uint32(0); lane < threads; lane++ {
 		j := lane * (memory / threads)
@@ -211,7 +211,6 @@ func initBlocks(B []block, h0 *[blake2b.Size + 8]byte, memory, threads uint32) [
 			B[j+1][i] = binary.LittleEndian.Uint64(block0[i*8:])
 		}
 	}
-	return B
 }
 
 func processBlocks(B []block, time, memory, threads uint32, mode int) {
