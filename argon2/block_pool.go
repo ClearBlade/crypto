@@ -8,7 +8,7 @@ import (
 )
 
 var (
-	blockPoolMutex sync.RWMutex
+	blockPoolMutex sync.Mutex
 	blockPools     *lru.Cache[uint32, *sync.Pool]
 )
 
@@ -22,7 +22,7 @@ func init() {
 }
 
 func getOrCreateBlockPool(size uint32) *sync.Pool {
-	if pool, ok := getBlockPool(size); ok {
+	if pool, ok := blockPools.Get(size); ok {
 		return pool
 	}
 
@@ -45,10 +45,4 @@ func upsertBlockPool(size uint32) *sync.Pool {
 
 	blockPools.Add(size, pool)
 	return pool
-}
-
-func getBlockPool(size uint32) (*sync.Pool, bool) {
-	blockPoolMutex.RLock()
-	defer blockPoolMutex.RUnlock()
-	return blockPools.Get(size)
 }
