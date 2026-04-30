@@ -51,14 +51,14 @@ const (
 )
 
 var (
-	memoryPoolMutex sync.Mutex
-	memoryPools     = make(map[uint32]*sync.Pool)
+	blockPoolMutex sync.Mutex
+	blockPools     = make(map[uint32]*sync.Pool)
 )
 
-func getMemoryPool(size uint32) *sync.Pool {
-	memoryPoolMutex.Lock()
-	defer memoryPoolMutex.Unlock()
-	pool, ok := memoryPools[size]
+func getBlockPool(size uint32) *sync.Pool {
+	blockPoolMutex.Lock()
+	defer blockPoolMutex.Unlock()
+	pool, ok := blockPools[size]
 	if ok {
 		return pool
 	}
@@ -68,7 +68,7 @@ func getMemoryPool(size uint32) *sync.Pool {
 			return make([]block, size)
 		},
 	}
-	memoryPools[size] = pool
+	blockPools[size] = pool
 	return pool
 }
 
@@ -137,10 +137,10 @@ func deriveKey(mode int, password, salt, secret, data []byte, time, memory uint3
 		memory = 2 * syncPoints * uint32(threads)
 	}
 
-	pool := getMemoryPool(memory)
+	pool := getBlockPool(memory)
 	B := pool.Get().([]block)
 	defer pool.Put(B)
-	zeroBlocks(B)
+	clearBlocks(B)
 
 	initBlocks(B, &h0, memory, uint32(threads))
 	processBlocks(B, time, memory, uint32(threads), mode)
@@ -185,7 +185,7 @@ func initHash(password, salt, key, data []byte, time, memory, threads, keyLen ui
 	return h0
 }
 
-func zeroBlocks(B []block) {
+func clearBlocks(B []block) {
 	for i := range B {
 		for j := range B[i] {
 			B[i][j] = 0
@@ -195,7 +195,6 @@ func zeroBlocks(B []block) {
 
 func initBlocks(B []block, h0 *[blake2b.Size + 8]byte, memory, threads uint32) []block {
 	var block0 [1024]byte
-
 	for lane := uint32(0); lane < threads; lane++ {
 		j := lane * (memory / threads)
 		binary.LittleEndian.PutUint32(h0[blake2b.Size+4:], lane)
