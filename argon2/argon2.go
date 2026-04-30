@@ -50,28 +50,6 @@ const (
 	argon2id
 )
 
-var (
-	blockPoolMutex sync.Mutex
-	blockPools     = make(map[uint32]*sync.Pool)
-)
-
-func getBlockPool(size uint32) *sync.Pool {
-	blockPoolMutex.Lock()
-	defer blockPoolMutex.Unlock()
-	pool, ok := blockPools[size]
-	if ok {
-		return pool
-	}
-
-	pool = &sync.Pool{
-		New: func() interface{} {
-			return make([]block, size)
-		},
-	}
-	blockPools[size] = pool
-	return pool
-}
-
 // Key derives a key from the password, salt, and cost parameters using Argon2i
 // returning a byte slice of length keyLen that can be used as cryptographic
 // key. The CPU cost and parallelism degree must be greater than zero.
@@ -137,7 +115,7 @@ func deriveKey(mode int, password, salt, secret, data []byte, time, memory uint3
 		memory = 2 * syncPoints * uint32(threads)
 	}
 
-	pool := getBlockPool(memory)
+	pool := getOrCreateBlockPool(memory)
 	B := pool.Get().([]block)
 	defer pool.Put(B)
 	defer clearBlocks(B)
@@ -183,14 +161,6 @@ func initHash(password, salt, key, data []byte, time, memory, threads, keyLen ui
 	b2.Write(data)
 	b2.Sum(h0[:0])
 	return h0
-}
-
-func clearBlocks(B []block) {
-	for i := range B {
-		for j := range B[i] {
-			B[i][j] = 0
-		}
-	}
 }
 
 func initBlocks(B []block, h0 *[blake2b.Size + 8]byte, memory, threads uint32) {

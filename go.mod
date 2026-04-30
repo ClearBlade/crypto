@@ -8,4 +8,6 @@ require (
 	golang.org/x/term v0.42.0
 )
 
+require github.com/hashicorp/golang-lru/v2 v2.0.7
+
 require golang.org/x/text v0.36.0 // indirect
