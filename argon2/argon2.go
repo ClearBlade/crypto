@@ -118,7 +118,7 @@ func deriveKey(mode int, password, salt, secret, data []byte, time, memory uint3
 	pool := getOrCreateBlockPool(memory)
 	B := pool.Get().([]block)
 	defer pool.Put(B)
-	defer clearBlocks(B)
+	defer clear(B)
 
 	initBlocks(B, &h0, memory, uint32(threads))
 	processBlocks(B, time, memory, uint32(threads), mode)

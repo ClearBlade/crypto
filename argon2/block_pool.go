@@ -53,11 +53,3 @@ func getBlockPool(size uint32) (*sync.Pool, bool) {
 	defer blockPoolMutex.RUnlock()
 	return blockPools.Get(size)
 }
-
-func clearBlocks(B []block) {
-	for i := range B {
-		for j := range B[i] {
-			B[i][j] = 0
-		}
-	}
-}
