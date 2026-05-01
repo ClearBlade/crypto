@@ -20,9 +20,9 @@ import (
 	"path/filepath"
 	"testing"
 
-	"golang.org/x/crypto/internal/testenv"
-	"golang.org/x/crypto/ssh"
-	"golang.org/x/crypto/ssh/testdata"
+	"github.com/clearblade/crypto/internal/testenv"
+	"github.com/clearblade/crypto/ssh"
+	"github.com/clearblade/crypto/ssh/testdata"
 )
 
 // unixConnection creates two halves of a connected net.UnixConn.  It
