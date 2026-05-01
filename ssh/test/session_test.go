@@ -18,7 +18,7 @@ import (
 	"strings"
 	"testing"
 
-	"golang.org/x/crypto/ssh"
+	"github.com/clearblade/crypto/ssh"
 )
 
 func skipIfIssue64959(t *testing.T, err error) {

@@ -5,17 +5,17 @@
 package main
 
 import (
+	_ "github.com/clearblade/crypto/blake2s"
 	. "github.com/mmcloughlin/avo/build"
 	"github.com/mmcloughlin/avo/ir"
 	. "github.com/mmcloughlin/avo/operand"
 	. "github.com/mmcloughlin/avo/reg"
-	_ "golang.org/x/crypto/blake2s"
 )
 
 //go:generate go run . -out ../blake2s_amd64.s -pkg blake2s
 
 func main() {
-	Package("golang.org/x/crypto/blake2s")
+	Package("github.com/clearblade/crypto/blake2s")
 	ConstraintExpr("amd64,gc,!purego")
 	hashBlocksSSE2()
 	hashBlocksSSSE3()

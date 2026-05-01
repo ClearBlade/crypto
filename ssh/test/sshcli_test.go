@@ -13,9 +13,9 @@ import (
 	"runtime"
 	"testing"
 
-	"golang.org/x/crypto/internal/testenv"
-	"golang.org/x/crypto/ssh"
-	"golang.org/x/crypto/ssh/testdata"
+	"github.com/clearblade/crypto/internal/testenv"
+	"github.com/clearblade/crypto/ssh"
+	"github.com/clearblade/crypto/ssh/testdata"
 )
 
 func sshClient(t *testing.T) string {

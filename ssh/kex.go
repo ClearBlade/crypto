@@ -17,7 +17,7 @@ import (
 	"math/big"
 	"slices"
 
-	"golang.org/x/crypto/curve25519"
+	"github.com/clearblade/crypto/curve25519"
 )
 
 const (

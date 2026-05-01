@@ -41,10 +41,10 @@ import (
 	cryptorand "crypto/rand"
 	"io"
 
-	"golang.org/x/crypto/blake2b"
-	"golang.org/x/crypto/curve25519"
-	"golang.org/x/crypto/nacl/secretbox"
-	"golang.org/x/crypto/salsa20/salsa"
+	"github.com/clearblade/crypto/blake2b"
+	"github.com/clearblade/crypto/curve25519"
+	"github.com/clearblade/crypto/nacl/secretbox"
+	"github.com/clearblade/crypto/salsa20/salsa"
 )
 
 const (
