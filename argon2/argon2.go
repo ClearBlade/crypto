@@ -114,9 +114,15 @@ func deriveKey(mode int, password, salt, secret, data []byte, time, memory uint3
 	if memory < 2*syncPoints*uint32(threads) {
 		memory = 2 * syncPoints * uint32(threads)
 	}
-	B := initBlocks(&h0, memory, uint32(threads))
-	processBlocks(B, time, memory, uint32(threads), mode)
-	return extractKey(B, memory, uint32(threads), keyLen)
+
+	pool := getOrCreateBlockPool(memory)
+	B := pool.Get().(*[]block)
+	defer pool.Put(B)
+	defer clear(*B)
+
+	initBlocks(*B, &h0, memory, uint32(threads))
+	processBlocks(*B, time, memory, uint32(threads), mode)
+	return extractKey(*B, memory, uint32(threads), keyLen)
 }
 
 const (
@@ -157,9 +163,8 @@ func initHash(password, salt, key, data []byte, time, memory, threads, keyLen ui
 	return h0
 }
 
-func initBlocks(h0 *[blake2b.Size + 8]byte, memory, threads uint32) []block {
+func initBlocks(B []block, h0 *[blake2b.Size + 8]byte, memory, threads uint32) {
 	var block0 [1024]byte
-	B := make([]block, memory)
 	for lane := uint32(0); lane < threads; lane++ {
 		j := lane * (memory / threads)
 		binary.LittleEndian.PutUint32(h0[blake2b.Size+4:], lane)
@@ -176,7 +181,6 @@ func initBlocks(h0 *[blake2b.Size + 8]byte, memory, threads uint32) []block {
 			B[j+1][i] = binary.LittleEndian.Uint64(block0[i*8:])
 		}
 	}
-	return B
 }
 
 func processBlocks(B []block, time, memory, threads uint32, mode int) {
